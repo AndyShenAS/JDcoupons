@@ -13,17 +13,34 @@ class CouponsSpider(scrapy.Spider):
 
         # urlstr = "http://a.jd.com/coupons.html?page={}"
         # urls = [ urlstr.format(x) for x in range(3,5)]
-        urls = UrlPool()
-        for url in  urls.get():
+        self.goods = set()
+        self.urls = UrlPool()
+        for url in  self.urls.get():
             yield  scrapy.Request(url = url, callback=self.parse)
 
-        for url in self.items['good']['url']:
-            print(url)
-            yield  scrapy.Request(url = url, callback=self.parseGoods)
+        # for url in self.items['good']['url']:
+        #     print(url)
+        #     yield  scrapy.Request(url = url, callback=self.parseGoods)
+        #
+        # print(self.items['good']['url'])
 
-        print(self.items['good']['url'])
+    def parse(self, response,):
+        url = response.url
+        print('parse',url)
+        head = url.split('.')[0]
+        if head == 'http://search':
+            self._parseGoods(response)
+        elif head == 'http://a':
+            self._couponsPage(response)
+        elif head == 'http://what':
+            print('what')
+        elif head == 'http://mall':
+            print('mall')
 
-    def parse(self, response):
+
+
+
+    def _couponsPage(self,response):
         pages = response.xpath("//*[@class=\"quan-item quan-d-item quan-item-acoupon \"]")
         for page in  pages:
             dataKey = page.xpath('@data-key').extract()
@@ -36,35 +53,22 @@ class CouponsSpider(scrapy.Spider):
             usable = page.xpath('div//div[2]//div[2]//text()').extract()[0].strip()
             timeLong = page.xpath('div//div[2]//div[3]//text()').extract()[0].strip()
             # state = page.xpath('div[3]//div[1]//text()').extract()[0]
-            self._classify(dataLinkurl[0])
+            print('get datalinkur', dataLinkurl)
+            self.urls.insert(dataLinkurl[0])
             # print(dataLinkurl)
         # print(self.goodIds)
 
-    def _classify(self,url):
-        head = url.split('.')[0]
-        if head == '//search':
-            # print(url)
-            self.items['good']['url'].add("https:"+url)
-            # scrapy.Request(url="https:" + url, callback=self.parse2)
-        elif head == '//what':
-            print('what')
-        elif head == '//mall':
-            print('mall')
-
-        # print(self.goodIds)
-
-    def parseGoods(self, response):
+    def _parseGoods(self, response):
         # print('getin second link')
         goods = response.xpath("//*[@id=\"J_goodsList\"]//ul//li")
         for good in goods:
             # print('good',good)
             goodId = good.xpath('@data-sku').extract()[0]
             # print('good',goodId)
-            self.items['good']['id'].add(goodId)
+            self.goods.add(goodId)
 
 
 
-class
 
 
 
