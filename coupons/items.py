@@ -13,3 +13,4 @@ class CouponsItem(scrapy.Item):
     # name = scrapy.Field()
     good = scrapy.Field()
 
+
