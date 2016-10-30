@@ -1,11 +1,14 @@
 import  scrapy
 from coupons.items import  CouponsItem
+import  pdb
+import  json
 
 class CouponsSpider(scrapy.Spider):
 
     name = "coupons"
     allowed_domains = ['jd.com']
-    start_urls = ["http://a.jd.com/coupons.html?page={}".format(x) for x in range(3, 5)]
+    start_urls = ["http://a.jd.com/coupons.html?page={}"\
+                      .format(x) for x in range(1, 20)]
 
     def parse(self, response):
         pages = response.xpath("//*[@class=\"quan-item quan-d-item quan-item-acoupon \"]")
@@ -43,7 +46,7 @@ class CouponsSpider(scrapy.Spider):
         head = url.split('.')[0]
         if head == 'http://search':
             ids = self._parseGoods(response)
-            gooditem['good'] = {url:ids}
+            gooditem['good'] = (response.meta,ids)
             yield gooditem
         elif head == 'http://what':
             print('what')
@@ -60,3 +63,18 @@ class CouponsSpider(scrapy.Spider):
             goodId = good.xpath('@data-sku').extract()[0]
             ids.append(goodId)
         return ids
+
+    def close(spider, reason):
+        goods = {}
+        with open('data\\items.json', 'rb') as f:
+            for line in f.readlines():
+                value, keys = json.loads(line.decode('utf-8'))['good']
+                for key in keys:
+                    if key in goods.keys():
+                        goods[key].append(value)
+                    else:
+                        goods[key] = [value]
+
+        with open('data\\goods.json', 'wb') as f:
+            goodsjs = json.dumps(goods).encode('utf-8')
+            f.write(goodsjs)

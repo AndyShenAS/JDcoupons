@@ -20,7 +20,6 @@ class JsonWriterPipeline(object):
 
     def process_item(self, item, spider):
         line = json.dumps(dict(item)) + "\n"
-        print('write json',line)
         if type(line) == str:
             line = line.encode('utf-8')
         self.file.write(line)
