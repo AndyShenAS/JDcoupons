@@ -65,7 +65,8 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'coupons.pipelines.CouponsPipeline': 300,
+   # 'coupons.pipelines.CouponsPipeline': 500,
+   'coupons.pipelines.JsonWriterPipeline':400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
