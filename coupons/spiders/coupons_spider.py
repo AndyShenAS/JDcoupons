@@ -8,7 +8,7 @@ class CouponsSpider(scrapy.Spider):
     name = "coupons"
     allowed_domains = ['jd.com']
     start_urls = ["http://a.jd.com/coupons.html?page={}"\
-                      .format(x) for x in range(1, 20)]
+                      .format(x) for x in range(1, 50)]
 
     def parse(self, response):
         pages = response.xpath("//*[@class=\"quan-item quan-d-item quan-item-acoupon \"]")
@@ -18,6 +18,7 @@ class CouponsSpider(scrapy.Spider):
             yield scrapy.Request(url=url, meta=metadata, callback= self.classfy)
 
     def _xpathCounponsMetaData(self,page):
+        """xpath rules"""
         dataKey = page.xpath('@data-key').extract()
         dataLinkurl = page.xpath('@data-linkurl').extract()
         rmb = page.xpath('div//div[1]//strong/text()').extract()[0]
@@ -40,6 +41,7 @@ class CouponsSpider(scrapy.Spider):
 
 
     def classfy(self, response):
+        """second url callback"""
         gooditem = CouponsItem()
         url = response.url
         print('parse',response.meta)
@@ -57,6 +59,7 @@ class CouponsSpider(scrapy.Spider):
 
 
     def _parseGoods(self, response):
+        """second url xpath rules"""
         ids = []
         goods = response.xpath("//*[@id=\"J_goodsList\"]//ul//li")
         for good in goods:
@@ -65,6 +68,7 @@ class CouponsSpider(scrapy.Spider):
         return ids
 
     def close(spider, reason):
+        """scrapy's work is down, proccessing data"""
         goods = {}
         with open('data\\items.json', 'rb') as f:
             for line in f.readlines():
